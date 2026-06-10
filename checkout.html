@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leone — Ödeme / Checkout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#F7F3EE;--cream2:#EDE7DC;--cream3:#DDD3C4;
+  --gold:#B8936A;--gold2:#8B6542;--dark:#1C1A18;--mid:#5A4E42;
+}
+body{background:var(--cream);color:var(--dark);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh}
+
+/* NAV */
+nav{background:var(--cream);border-bottom:1px solid var(--cream3);padding:0 5%}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;letter-spacing:6px;text-transform:uppercase;color:var(--dark);text-decoration:none}
+.logo span{color:var(--gold)}
+.back-btn{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color .2s}
+.back-btn:hover{color:var(--gold)}
+.lang-toggle{display:flex;gap:4px;font-size:11px;letter-spacing:1px}
+.lang-toggle button{padding:3px 6px;border:1px solid var(--cream3);border-radius:0;cursor:pointer;background:none;color:var(--mid);transition:all .2s;font-family:'Jost',sans-serif}
+.lang-toggle button.active{background:var(--dark);color:var(--cream);border-color:var(--dark)}
+
+/* PROGRESS */
+.progress{background:var(--cream2);padding:16px 5%;display:flex;align-items:center;gap:0}
+.step{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mid)}
+.step.active{color:var(--dark)}
+.step.done{color:var(--gold)}
+.step-num{width:24px;height:24px;border-radius:50%;border:1px solid var(--cream3);display:flex;align-items:center;justify-content:center;font-size:11px}
+.step.active .step-num{background:var(--dark);color:var(--cream);border-color:var(--dark)}
+.step.done .step-num{background:var(--gold);color:white;border-color:var(--gold)}
+.step-line{flex:1;height:1px;background:var(--cream3);margin:0 16px}
+
+/* MAIN LAYOUT */
+.checkout-wrap{display:grid;grid-template-columns:1fr 380px;gap:48px;max-width:1100px;margin:48px auto;padding:0 5%}
+
+/* FORM */
+.form-section h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:24px;color:var(--dark)}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px}
+.form-group input,.form-group select{width:100%;background:white;border:1px solid var(--cream3);padding:12px 14px;font-size:14px;font-family:'Jost',sans-serif;color:var(--dark);outline:none;transition:border-color .2s;border-radius:0;-webkit-appearance:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.section-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:32px 0 20px;padding-top:24px;border-top:1px solid var(--cream3)}
+
+/* ÖDEME YÖNTEMİ */
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.pay-method{border:1px solid var(--cream3);padding:16px;cursor:pointer;transition:all .2s;text-align:center;position:relative}
+.pay-method.selected{border-color:var(--gold);background:rgba(184,147,106,0.05)}
+.pay-method input{position:absolute;opacity:0}
+.pay-method-icon{font-size:24px;margin-bottom:8px}
+.pay-method-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mid)}
+.pay-method.selected .pay-method-name{color:var(--dark)}
+
+/* KART FORMU */
+.card-form{background:white;border:1px solid var(--cream3);padding:24px;margin-bottom:24px}
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card-badges{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+.card-badge{background:var(--cream2);border:1px solid var(--cream3);padding:4px 10px;font-size:10px;letter-spacing:1px;color:var(--mid)}
+.secure-badge{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mid);margin-top:12px}
+
+/* HAVALE */
+.bank-info{background:white;border:1px solid var(--cream3);border-left:3px solid var(--gold);padding:20px;display:none}
+.bank-info.show{display:block}
+.bank-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--cream3)}
+.bank-row:last-child{border-bottom:none}
+.bank-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mid)}
+.bank-value{font-size:14px;color:var(--dark);font-weight:400}
+.copy-btn{background:none;border:1px solid var(--cream3);padding:4px 10px;font-size:10px;cursor:pointer;color:var(--mid);font-family:'Jost',sans-serif;transition:all .2s}
+.copy-btn:hover{background:var(--dark);color:var(--cream)}
+
+/* ORDER SUMMARY */
+.order-summary{background:var(--dark);padding:32px;align-self:start;position:sticky;top:80px}
+.summary-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--cream);margin-bottom:24px}
+.cart-items{max-height:300px;overflow-y:auto;margin-bottom:24px}
+.cart-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(237,231,220,0.1)}
+.cart-item:last-child{border-bottom:none}
+.item-img{width:60px;height:60px;object-fit:cover;background:var(--cream2)}
+.item-info{flex:1}
+.item-name{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--cream);margin-bottom:2px}
+.item-metal{font-size:11px;color:rgba(237,231,220,0.5)}
+.item-price{font-size:14px;color:var(--gold)}
+.item-qty{display:flex;align-items:center;gap:8px;margin-top:6px}
+.qty-btn{width:24px;height:24px;background:rgba(237,231,220,0.1);border:none;color:var(--cream);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.qty-num{font-size:13px;color:var(--cream);min-width:20px;text-align:center}
+.remove-btn{background:none;border:none;color:rgba(237,231,220,0.4);cursor:pointer;font-size:12px;margin-left:auto}
+.summary-line{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px}
+.summary-label{color:rgba(237,231,220,0.6)}
+.summary-val{color:var(--cream)}
+.summary-divider{height:1px;background:rgba(237,231,220,0.15);margin:16px 0}
+.summary-total{display:flex;justify-content:space-between;align-items:baseline}
+.total-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(237,231,220,0.6)}
+.total-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--gold)}
+.empty-cart{text-align:center;padding:40px 0;color:rgba(237,231,220,0.5);font-size:14px}
+
+/* SUBMIT */
+.submit-btn{width:100%;background:var(--gold);color:white;border:none;padding:16px;font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;transition:background .2s;margin-top:24px}
+.submit-btn:hover{background:var(--gold2)}
+.submit-btn:disabled{background:var(--cream3);cursor:not-allowed;color:var(--mid)}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:80px 20px;max-width:500px;margin:0 auto}
+.success-screen.show{display:block}
+.checkout-form-wrap.hide{display:none}
+.success-icon{width:64px;height:64px;border-radius:50%;background:rgba(184,147,106,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;color:var(--gold)}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;margin-bottom:16px}
+.success-sub{font-size:15px;color:var(--mid);line-height:1.8;margin-bottom:32px}
+.order-num{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold)}
+
+/* MOBILE */
+@media(max-width:768px){
+  .checkout-wrap{grid-template-columns:1fr;gap:32px}
+  .order-summary{position:static}
+  .payment-methods{grid-template-columns:1fr 1fr}
+  .form-row{grid-template-columns:1fr}
+}
+
+/* LANG */
+[data-tr]{display:inline}[data-en]{display:none}
+body.lang-en [data-tr]{display:none}body.lang-en [data-en]{display:inline}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="back-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M19 12H5m0 0 7 7m-7-7 7-7"/></svg>
+      <span data-tr>Alışverişe Dön</span><span data-en>Continue Shopping</span>
+    </a>
+    <a href="index.html" class="logo">L<span>E</span>ONE</a>
+    <div class="lang-toggle">
+      <button id="btn-tr" class="active" onclick="setLang('tr')">TR</button>
+      <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress">
+  <div class="step active">
+    <span class="step-num">1</span>
+    <span data-tr>Teslimat</span><span data-en>Delivery</span>
+  </div>
+  <div class="step-line"></div>
+  <div class="step active">
+    <span class="step-num">2</span>
+    <span data-tr>Ödeme</span><span data-en>Payment</span>
+  </div>
+  <div class="step-line"></div>
+  <div class="step" id="step3">
+    <span class="step-num">3</span>
+    <span data-tr>Onay</span><span data-en>Confirmation</span>
+  </div>
+</div>
+
+<!-- CHECKOUT WRAP -->
+<div class="checkout-wrap">
+
+  <!-- FORM -->
+  <div class="checkout-form-wrap" id="checkoutForm">
+
+    <!-- TESLİMAT BİLGİLERİ -->
+    <div class="form-section">
+      <h2><span data-tr>Teslimat Bilgileri</span><span data-en>Delivery Details</span></h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><span data-tr>Ad</span><span data-en>First Name</span></label>
+          <input type="text" id="firstName" placeholder="Ayşe">
+        </div>
+        <div class="form-group">
+          <label><span data-tr>Soyad</span><span data-en>Last Name</span></label>
+          <input type="text" id="lastName" placeholder="Yılmaz">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><span data-tr>E-posta</span><span data-en>Email</span></label>
+        <input type="email" id="email" placeholder="ayse@email.com">
+      </div>
+
+      <div class="form-group">
+        <label><span data-tr>Telefon</span><span data-en>Phone</span></label>
+        <input type="tel" id="phone" placeholder="+90 555 000 00 00">
+      </div>
+
+      <div class="form-group">
+        <label><span data-tr>Adres</span><span data-en>Address</span></label>
+        <input type="text" id="address" placeholder="Cadde, Sokak, No, Daire">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><span data-tr>Şehir</span><span data-en>City</span></label>
+          <input type="text" id="city" placeholder="İstanbul">
+        </div>
+        <div class="form-group">
+          <label><span data-tr>Ülke</span><span data-en>Country</span></label>
+          <select id="country">
+            <option value="TR">Türkiye</option>
+            <option value="DE">Deutschland / Germany</option>
+            <option value="GB">United Kingdom</option>
+            <option value="FR">France</option>
+            <option value="NL">Netherlands</option>
+            <option value="US">United States</option>
+            <option value="AE">UAE</option>
+            <option value="SA">Saudi Arabia</option>
+            <option value="other">Diğer / Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÖDEME YÖNTEMİ -->
+    <div class="section-title" data-tr>Ödeme Yöntemi</div>
+    <div class="section-title" data-en>Payment Method</div>
+
+    <div class="payment-methods">
+      <label class="pay-method selected" onclick="selectPayment('card')">
+        <input type="radio" name="payment" value="card" checked>
+        <div class="pay-method-icon">💳</div>
+        <div class="pay-method-name" data-tr>Kredi / Banka Kartı</div>
+        <div class="pay-method-name" data-en>Credit / Debit Card</div>
+      </label>
+      <label class="pay-method" onclick="selectPayment('transfer')">
+        <input type="radio" name="payment" value="transfer">
+        <div class="pay-method-icon">🏦</div>
+        <div class="pay-method-name" data-tr>Havale / EFT</div>
+        <div class="pay-method-name" data-en>Bank Transfer</div>
+      </label>
+    </div>
+
+    <!-- KART FORMU -->
+    <div class="card-form" id="cardForm">
+      <div class="card-badges">
+        <span class="card-badge">Visa</span>
+        <span class="card-badge">Mastercard</span>
+        <span class="card-badge">3D Secure</span>
+        <span class="card-badge">iyzico</span>
+      </div>
+
+      <div class="form-group">
+        <label><span data-tr>Kart Numarası</span><span data-en>Card Number</span></label>
+        <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCard(this)">
+      </div>
+      <div class="form-group">
+        <label><span data-tr>Kart Üzerindeki İsim</span><span data-en>Name on Card</span></label>
+        <input type="text" id="cardName" placeholder="AYŞE YILMAZ">
+      </div>
+      <div class="card-row">
+        <div class="form-group">
+          <label><span data-tr>Son Kullanma</span><span data-en>Expiry</span></label>
+          <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+        </div>
+        <div class="form-group">
+          <label>CVV</label>
+          <input type="text" id="cardCvv" placeholder="000" maxlength="3">
+        </div>
+      </div>
+      <div class="secure-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span data-tr>256-bit SSL ile korumalı • iyzico güvencesiyle</span>
+        <span data-en>Protected with 256-bit SSL • Secured by iyzico</span>
+      </div>
+    </div>
+
+    <!-- HAVALE BİLGİLERİ -->
+    <div class="bank-info" id="bankInfo">
+      <p style="font-size:13px;color:var(--mid);margin-bottom:16px;" data-tr>Siparişinizi tamamladıktan sonra aşağıdaki hesaba ödeme yapın. Havale açıklamasına sipariş numaranızı yazın.</p>
+      <p style="font-size:13px;color:var(--mid);margin-bottom:16px;" data-en>After placing your order, transfer to the account below. Include your order number in the description.</p>
+      <div class="bank-row">
+        <div>
+          <div class="bank-label">Banka / Bank</div>
+          <div class="bank-value">Ziraat Bankası</div>
+        </div>
+      </div>
+      <div class="bank-row">
+        <div>
+          <div class="bank-label">Hesap Sahibi / Account Holder</div>
+          <div class="bank-value">Leone Kuyumculuk Ltd. Şti.</div>
+        </div>
+      </div>
+      <div class="bank-row">
+        <div>
+          <div class="bank-label">IBAN</div>
+          <div class="bank-value" id="ibanVal">TR00 0001 0000 0000 0000 0000 00</div>
+        </div>
+        <button class="copy-btn" onclick="copyIban()">
+          <span data-tr>Kopyala</span><span data-en>Copy</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="submit-btn" id="submitBtn" onclick="placeOrder()">
+      <span data-tr>SİPARİŞİ TAMAMLA</span>
+      <span data-en>PLACE ORDER</span>
+    </button>
+
+    <p style="font-size:12px;color:var(--mid);text-align:center;margin-top:16px;line-height:1.7;" data-tr>
+      Sipariş vererek <a href="#" style="color:var(--gold)">Satış Sözleşmesi</a> ve <a href="#" style="color:var(--gold)">Gizlilik Politikası</a>'nı kabul etmiş olursunuz.
+    </p>
+    <p style="font-size:12px;color:var(--mid);text-align:center;margin-top:16px;line-height:1.7;" data-en>
+      By placing an order you agree to our <a href="#" style="color:var(--gold)">Sales Agreement</a> and <a href="#" style="color:var(--gold)">Privacy Policy</a>.
+    </p>
+
+  </div>
+
+  <!-- ORDER SUMMARY -->
+  <div class="order-summary">
+    <div class="summary-title" data-tr>Sipariş Özeti</div>
+    <div class="summary-title" data-en>Order Summary</div>
+
+    <div class="cart-items" id="cartItems">
+      <div class="empty-cart" data-tr>Sepetiniz boş</div>
+      <div class="empty-cart" data-en>Your cart is empty</div>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-line">
+      <span class="summary-label" data-tr>Ara Toplam</span>
+      <span class="summary-label" data-en>Subtotal</span>
+      <span class="summary-val" id="subtotalVal">₺0</span>
+    </div>
+    <div class="summary-line">
+      <span class="summary-label" data-tr>Kargo</span>
+      <span class="summary-label" data-en>Shipping</span>
+      <span class="summary-val" id="shippingVal" style="color:#B8936A" data-tr>Ücretsiz</span>
+    </div>
+
+    <div class="summary-divider"></div>
+
+    <div class="summary-total">
+      <span class="total-label" data-tr>Toplam</span>
+      <span class="total-label" data-en>Total</span>
+      <span class="total-val" id="totalVal">₺0</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">
+    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h2 class="success-title" style="font-family:'Cormorant Garamond',serif;" data-tr>Siparişiniz Alındı</h2>
+  <h2 class="success-title" style="font-family:'Cormorant Garamond',serif;" data-en>Order Confirmed</h2>
+  <div class="order-num" id="orderNum">#LE00001</div>
+  <p class="success-sub" data-tr>Teşekkürler! Siparişiniz alındı. E-posta adresinize onay maili gönderildi. Kargo takip bilgisi hazır olduğunda ayrıca bildirim alacaksınız.</p>
+  <p class="success-sub" data-en>Thank you! Your order has been received. A confirmation email has been sent. You will be notified when your tracking information is ready.</p>
+  <a href="index.html" style="display:inline-block;background:var(--dark);color:var(--cream);padding:14px 40px;font-size:11px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;margin-top:8px;" data-tr>Alışverişe Devam Et</a>
+  <a href="index.html" style="display:inline-block;background:var(--dark);color:var(--cream);padding:14px 40px;font-size:11px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;margin-top:8px;" data-en>Continue Shopping</a>
+</div>
+
+<script>
+const PRODUCTS = [
+  {id:1,tr:"Safir Halo Yüzük",en:"Sapphire Halo Ring",price_tr:28500,price_en:1490},
+  {id:2,tr:"Zümrüt Pim Küpe",en:"Emerald Stud Earrings",price_tr:19200,price_en:990},
+  {id:3,tr:"Zümrüt Kolye Ucu",en:"Emerald Pendant",price_tr:15800,price_en:820},
+  {id:4,tr:"Pırlanta Cluster Yüzük",en:"Diamond Cluster Ring",price_tr:29900,price_en:1540},
+  {id:5,tr:"Marquise Pırlanta Yüzük",en:"Marquise Diamond Ring",price_tr:42000,price_en:2190},
+  {id:6,tr:"Safir Pear Yüzük",en:"Sapphire Pear Ring",price_tr:36500,price_en:1890},
+  {id:7,tr:"Yakut Damla Kolye",en:"Ruby Drop Necklace",price_tr:52000,price_en:2690},
+  {id:8,tr:"Pırlanta Yuvarlak Kolye",en:"Diamond Round Pendant",price_tr:22500,price_en:1160},
+];
+
+let cart = JSON.parse(localStorage.getItem('leone_cart') || '[]');
+let lang = 'tr';
+let payMethod = 'card';
+
+function setLang(l) {
+  lang = l;
+  document.body.classList.toggle('lang-en', l === 'en');
+  document.getElementById('btn-tr').classList.toggle('active', l === 'tr');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  renderCart();
+}
+
+function selectPayment(method) {
+  payMethod = method;
+  document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.closest('.pay-method').classList.add('selected');
+  document.getElementById('cardForm').style.display = method === 'card' ? 'block' : 'none';
+  document.getElementById('bankInfo').classList.toggle('show', method === 'transfer');
+}
+
+function formatCard(input) {
+  let val = input.value.replace(/\D/g,'').substring(0,16);
+  input.value = val.replace(/(.{4})/g,'$1 ').trim();
+}
+
+function formatExpiry(input) {
+  let val = input.value.replace(/\D/g,'');
+  if(val.length>=2) val = val.substring(0,2) + '/' + val.substring(2,4);
+  input.value = val;
+}
+
+function copyIban() {
+  const iban = document.getElementById('ibanVal').textContent;
+  navigator.clipboard.writeText(iban);
+  const btn = event.target;
+  btn.textContent = '✓';
+  setTimeout(() => { btn.innerHTML = lang === 'en' ? 'Copy' : 'Kopyala'; }, 2000);
+}
+
+function saveCart() {
+  localStorage.setItem('leone_cart', JSON.stringify(cart));
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(x => x.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const isTR = lang === 'tr';
+
+  if (cart.length === 0) {
+    container.innerHTML = `<div class="empty-cart">${isTR ? 'Sepetiniz boş' : 'Your cart is empty'}</div>`;
+    document.getElementById('subtotalVal').textContent = isTR ? '₺0' : '€0';
+    document.getElementById('totalVal').textContent = isTR ? '₺0' : '€0';
+    document.getElementById('submitBtn').disabled = true;
+    return;
+  }
+
+  document.getElementById('submitBtn').disabled = false;
+
+  let html = '';
+  let subtotal = 0;
+
+  cart.forEach(item => {
+    const p = PRODUCTS.find(x => x.id === item.id);
+    if (!p) return;
+    const name = isTR ? p.tr : p.en;
+    const price = isTR ? p.price_tr : p.price_en;
+    const symbol = isTR ? '₺' : '€';
+    subtotal += price * item.qty;
+
+    html += `
+      <div class="cart-item">
+        <div class="item-info" style="flex:1">
+          <div class="item-name">${name}</div>
+          <div class="item-price">${symbol}${(price * item.qty).toLocaleString('tr-TR')}</div>
+          <div class="item-qty">
+            <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+  const symbol = isTR ? '₺' : '€';
+  document.getElementById('subtotalVal').textContent = symbol + subtotal.toLocaleString('tr-TR');
+  document.getElementById('shippingVal').textContent = isTR ? 'Ücretsiz' : 'Free';
+  document.getElementById('totalVal').textContent = symbol + subtotal.toLocaleString('tr-TR');
+}
+
+function validateForm() {
+  const fields = ['firstName','lastName','email','phone','address','city'];
+  for (const id of fields) {
+    if (!document.getElementById(id).value.trim()) {
+      document.getElementById(id).focus();
+      document.getElementById(id).style.borderColor = '#E24B4A';
+      return false;
+    }
+    document.getElementById(id).style.borderColor = '';
+  }
+  if (payMethod === 'card') {
+    const cardFields = ['cardNumber','cardName','cardExpiry','cardCvv'];
+    for (const id of cardFields) {
+      if (!document.getElementById(id).value.trim()) {
+        document.getElementById(id).focus();
+        document.getElementById(id).style.borderColor = '#E24B4A';
+        return false;
+      }
+      document.getElementById(id).style.borderColor = '';
+    }
+  }
+  return true;
+}
+
+function placeOrder() {
+  if (cart.length === 0) return;
+  if (!validateForm()) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = lang === 'tr' ? 'İşleniyor...' : 'Processing...';
+
+  // Burada gerçek iyzico API çağrısı yapılır
+  // Şimdilik simülasyon — iyzico entegrasyonu için backend gerekli
+  setTimeout(() => {
+    const orderNum = '#LE' + Date.now().toString().slice(-5);
+    document.getElementById('orderNum').textContent = orderNum;
+    document.getElementById('checkoutForm').classList.add('hide');
+    document.getElementById('successScreen').classList.add('show');
+    document.getElementById('step3').classList.add('active');
+    // Sepeti temizle
+    cart = [];
+    saveCart();
+  }, 2000);
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  renderCart();
+  if (cart.length === 0) {
+    document.getElementById('submitBtn').disabled = true;
+  }
+});
+</script>
+</body>
+</html>
